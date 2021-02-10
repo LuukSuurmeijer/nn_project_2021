@@ -21,6 +21,10 @@ def clean_file(infile,outfile):
             fout.write(line)
 
 # returns a list pf TokenLists, each TokenList is a sentence
+# each item in a token list has a corresponding dictionary storing information e.g.
+# {'id': 0, 'form': 'Xinhua', 'lemma': 'NNP', 'upos': '(TOP(FRAG(NP*', 'xpos': None, 'feats': None, 'head': None, 'deprel': '_', 'deps': '(ORG*', 'misc': None}
+# in our case keys are not named correctly because the columns do not have the correct order (e.g. the key "lemma" actually stores the POS tag)
+# for more information see: https://pypi.org/project/conllu/
 def parse_conll_file(file):
     with open(file) as f:
         data = f.read()
@@ -28,6 +32,7 @@ def parse_conll_file(file):
     sentences = conllu.parse(data)
     # have to drop the last element of the sentence list because it is for whatever reason just an empty TokenList
     sentences.pop(-1)
+    print(sentences[0][0])
     return sentences
 
 
