@@ -2,7 +2,7 @@ import conllu
 import re
 import pandas as pd
 
-
+# clean the file because conllu.parse function needs id as first column, "_" and not "-" as None values and no floats in 'head' column
 def clean_file(infile,outfile):
     delete_list = ["nw/xinhua/02/chtb_0223   0   ", "nw/xinhua/02/chtb_0223   0    ", "bc/phoenix/00/phoenix_0001   0    ",
                    "bc/phoenix/00/phoenix_0001   0   ", "bc/phoenix/00/phoenix_0001   1    ",
@@ -20,7 +20,7 @@ def clean_file(infile,outfile):
                 line = re.sub(r"([0-9]+)\.([0-9]+)", "_", line)
             fout.write(line)
 
-
+# returns a list pf TokenLists, each TokenList is a sentence
 def parse_conll_file(file):
     with open(file) as f:
         data = f.read()
@@ -34,7 +34,7 @@ def parse_conll_file(file):
 def get_number_of_sentences(sentences):
     return len(sentences)
 
-
+# get a list which stores at index 0 the length of sentence 0 and so on
 def get_sentence_lengths(sentences):
     sentence_lengths = []
     for sentence in sentences:
@@ -46,9 +46,6 @@ def get_sentence_lengths(sentences):
 def get_sentence_length_stats(sentence_lengths):
     average_sen_len = sum(sentence_lengths) / len(sentence_lengths)
     return max(sentence_lengths), min(sentence_lengths), average_sen_len
-
-# data = pd.read_csv("sample.conll", sep="\t", names=["document name", "document id", "id", "word", "POS"], comment="#")
-# print(data)
 
 def main():
     infile = "sample.conll"
