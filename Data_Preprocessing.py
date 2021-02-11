@@ -32,7 +32,6 @@ def parse_conll_file(file):
     sentences = conllu.parse(data)
     # have to drop the last element of the sentence list because it is for whatever reason just an empty TokenList
     sentences.pop(-1)
-    print(sentences[0][0])
     return sentences
 
 
@@ -61,36 +60,33 @@ def create_tab_file(sentences, outfile):
             f.write("*\n")
 
 
-def get_tag_statistics(sentences):
+def get_information_about_data(sentences, filename):
+    sentence_lengths = get_sentence_lengths(sentences)
+    min, max, av, = get_sentence_length_stats(sentence_lengths)
     list_of_tags = []
     for sentence in sentences:
         for word in sentence:
             list_of_tags.append(word['lemma'])
     c = Counter(list_of_tags)
     number_of_tags = len(list_of_tags)
-    control_sum = 0
-    for tag in Counter(list_of_tags).keys():
-        control_sum += round(c[tag]/number_of_tags*100,2)
-        print(f"{tag}\t{round(c[tag]/number_of_tags*100,2)}%")
-
-def print_information_about_data(sentences):
-    sentence_lengths = get_sentence_lengths(sentences)
-    min, max, av, = get_sentence_length_stats(sentence_lengths)
-    print(f"Maximum sequence length: {min}\n"
-          f"Minimum sequence length: {max}\n"
-          f"Mean sequence length: {av}\n"
-          f"Number of sentences: {get_number_of_sentences(sentences)}\n")
-    print("Tags:")
-    get_tag_statistics(sentences)
+    with open(filename,"w+") as f:
+        f.write(f"Maximum sequence length: {min}\n"
+                f"Minimum sequence length: {max}\n"
+                f"Mean sequence length: {av}\n"
+                f"Number of sentences: {get_number_of_sentences(sentences)}\n")
+        f.write("\nTags:\n")
+        for tag in Counter(list_of_tags).keys():
+            f.write(f"{tag}\t{round(c[tag] / number_of_tags * 100, 2)}%\n")
 
 
 def main():
     infile = "sample.conll"
     outfile = "cleaned.conll"
+    info_file = "sample.info"
     clean_file(infile,outfile)
     sentences = parse_conll_file(outfile)
     create_tab_file(sentences, "sample.tsv")
-    print_information_about_data(sentences)
+    get_information_about_data(sentences, info_file)
 
 if __name__ == '__main__':
     main()
