@@ -52,6 +52,15 @@ def get_sentence_length_stats(sentence_lengths):
     average_sen_len = sum(sentence_lengths) / len(sentence_lengths)
     return max(sentence_lengths), min(sentence_lengths), average_sen_len
 
+
+def create_tab_file(sentences, outfile):
+    with open(outfile, "w+") as f:
+        for sentence in sentences:
+            for word in sentence:
+                f.write(f"{word['id']}\t{word['form']}\t{word['lemma']}\n")
+            f.write("*\n")
+
+
 def main():
     infile = "sample.conll"
     outfile = "cleaned.conll"
@@ -60,7 +69,7 @@ def main():
     sentence_lengths = get_sentence_lengths(sentences)
     length_stats = get_sentence_length_stats(sentence_lengths)
     print(length_stats)
-
+    create_tab_file(sentences, "sample.tsv")
 
 if __name__ == '__main__':
     main()
