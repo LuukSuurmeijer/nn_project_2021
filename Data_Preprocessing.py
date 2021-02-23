@@ -1,5 +1,7 @@
 import conllu
 import re
+import argparse
+import os
 from collections import Counter
 
 # clean the file because conllu.parse function needs id as first column, "_" and not "-" as None values and no floats in 'head' column
@@ -28,7 +30,6 @@ def clean_file(infile,outfile):
 def parse_conll_file(file):
     with open(file) as f:
         data = f.read()
-
     sentences = conllu.parse(data)
     # have to drop the last element of the sentence list because it is for whatever reason just an empty TokenList
     sentences.pop(-1)
@@ -80,13 +81,21 @@ def get_information_about_data(sentences, filename):
 
 
 def main():
-    infile = "sample.conll"
+    parser = argparse.ArgumentParser(description='Preprocess the conll data.')
+    parser.add_argument('input_file', help="input file (concatenated conll file)")
+    parser.add_argument('output_dir', help="output directory")
+    args = parser.parse_args()
+
+    if not os.path.exists(args.output_dir):
+        os.makedirs(args.output_dir)
     outfile = "cleaned.conll"
+    tsv_file = "sample.tsv"
     info_file = "sample.info"
-    clean_file(infile,outfile)
-    sentences = parse_conll_file(outfile)
-    create_tab_file(sentences, "sample.tsv")
-    get_information_about_data(sentences, info_file)
+
+    clean_file(args.input_file, os.path.join(args.output_dir, outfile))
+    sentences = parse_conll_file(os.path.join(args.output_dir,outfile))
+    create_tab_file(sentences, os.path.join(args.output_dir,tsv_file))
+    get_information_about_data(sentences, os.path.join(args.output_dir,info_file))
 
 if __name__ == '__main__':
     main()
