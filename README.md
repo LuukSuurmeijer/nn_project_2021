@@ -17,4 +17,4 @@ $ conda activate lara_luuk_annalena
 ```
 
 ## Data Preprocessing
-Running `python Data_Preprocessing.py [INPUT FILE] [OUTPUT DIR]` will create a directory with the files `sample.tsv` and `cleaned.conll` (containing data) and a `sample.info` file with information about data.
+Running `python Data_Preprocessing.py [INPUT FILE] [OUTPUT DIR]` will create a directory with the files `sample.tsv` and `cleaned.conll` (containing data) and a `sample.info` file with information about the data.
