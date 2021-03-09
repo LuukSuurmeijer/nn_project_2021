@@ -29,9 +29,11 @@ Run `python generate_split.py sample_cleaned.conll/sample.tsv --outdir train_tes
 
 Example of use:
 
-`d = datasets.load_dataset('TagDataset.py', data_dir='train_test_split/')
-d
->DatasetDict({
+`d = datasets.load_dataset('TagDataset.py', data_dir='train_test_split/')`
+
+`d`
+
+`>DatasetDict({
     train: Dataset({
         features: ['index', 'word', 'tag'],
         num_rows: 5217
@@ -40,15 +42,18 @@ d
         features: ['index', 'word', 'tag'],
         num_rows: 569
     })
-})
+})`
 
-d['train']
->Dataset({
+`d['train']`
+
+`>Dataset({
     features: ['index', 'word', 'tag'],
     num_rows: 5217
-})
-d['train'][0]
->{'index': 0, 'tag': 'NNP', 'word': 'Xinhua'}`
+})`
+
+`d['train'][0]`
+
+`>{'index': 0, 'tag': 'NNP', 'word': 'Xinhua'}`
 
 # Tokenizing
 
