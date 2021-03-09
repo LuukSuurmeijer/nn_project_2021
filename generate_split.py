@@ -1,8 +1,6 @@
 import csv
 import argparse
-import random
-from itertools import groupby
-import sys
+import os
 
 #i only want to split on whole sentences, so I look for the closest '*' based on split
 def find_nearest_delimiter(index, array):
