@@ -5,6 +5,7 @@
 * [General Info](#general-info)
 * [Installing](#installing)
 * [Data Preprocessing](#data-Preprocessing)
+* [Data Loading](#data-loading)
 
 ## General info
 Short description of the project.
@@ -55,7 +56,7 @@ Example of use:
 
 `>{'index': 0, 'tag': 'NNP', 'word': 'xinhua'}`
 
-# Tokenizing
+### Tokenizing
 
 Important for later: I have no idea what is going on with the tokenization in the example that Anna provided, so for now i just lowercase the words and remove punctuation from dates and numbers etc. This all happens in lines 60-80 in `TagDataset.py`.
 
