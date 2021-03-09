@@ -53,7 +53,7 @@ Example of use:
 
 `d['train'][0]`
 
-`>{'index': 0, 'tag': 'NNP', 'word': 'Xinhua'}`
+`>{'index': 0, 'tag': 'NNP', 'word': 'xinhua'}`
 
 # Tokenizing
 
