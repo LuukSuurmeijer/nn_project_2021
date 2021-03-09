@@ -5,3 +5,4 @@ dependencies:
   - pip
   - pip:
     - conllu==4.0
+    - datasets
