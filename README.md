@@ -31,7 +31,7 @@ Example of use:
 
 `d = datasets.load_dataset('TagDataset.py', data_dir='train_test_split/')
 d
->>> DatasetDict({
+>DatasetDict({
     train: Dataset({
         features: ['index', 'word', 'tag'],
         num_rows: 5217
@@ -43,12 +43,12 @@ d
 })
 
 d['train']
->>> Dataset({
+>Dataset({
     features: ['index', 'word', 'tag'],
     num_rows: 5217
 })
->>> d['train'][0]
-{'index': 0, 'tag': 'NNP', 'word': 'Xinhua'}`
+d['train'][0]
+>{'index': 0, 'tag': 'NNP', 'word': 'Xinhua'}`
 
 # Tokenizing
 
