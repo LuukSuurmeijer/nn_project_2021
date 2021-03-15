@@ -6,6 +6,7 @@ import csv
 import os
 import datasets
 import string
+from itertools import groupby
 
 
 _DESCRIPTION = """\
@@ -23,9 +24,8 @@ class TagDataset(datasets.GeneratorBasedBuilder):
         # TODO: This method specifies the datasets.DatasetInfo object which contains informations and typings for the dataset
         features = datasets.Features(
             {
-                "index":  datasets.Value("int32"),
-                "word": datasets.Value("string"),
-                "tag": datasets.Value("string")
+                "words": datasets.Sequence(datasets.Value("string")),
+                "tags": datasets.Sequence(datasets.Value("string"))
                 # These are the features of your dataset like images, labels ...
             }
         )
@@ -62,16 +62,9 @@ class TagDataset(datasets.GeneratorBasedBuilder):
 
         with open(filepath, encoding="utf-8") as f:
             data = csv.reader(f, delimiter='\t')
-            for id_, row in enumerate(data):
-                if len(row) == 3: #end of sentences character is skipped, see else
-                    yield id_, {
-                        "index": row[0],
-                        "word": row[1].lower().translate(str.maketrans('', '', string.punctuation)),
-                        "tag": row[2],
-                        }
-                else: #this is how i deal with the end of sentences asterisks, treat them as end of sentence tags with index -1
-                    yield id_, {
-                    "index": -1,
-                    "word": row[0],
-                    "tag": '<eos>',
+            fulldata = [tuple(group) for key, group in groupby(data, lambda x: x[0] == '*') if not key]
+            for id_, row in enumerate(fulldata):
+                yield id_, {
+                    "words": [item[1].lower() for item in row],
+                    "tags": [item[2] for item in row],
                     }
