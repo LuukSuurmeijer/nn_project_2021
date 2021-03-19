@@ -89,7 +89,6 @@ for epoch in range(EPOCHS):
         pred = pred.view(-1, pred.shape[-1])
         target = target.unsqueeze(0).view(-1)
 
-
         loss = criterion(pred, target) #calculate loss
         acc = accuracy(pred, target)
 
@@ -107,9 +106,11 @@ for epoch in range(EPOCHS):
             print("Epoch: {:<12} | acc: {:<12} | loss: {:<12}".format(f"{epoch+1} ({id}/{len(examples)})", acc ,loss.item()))
 
     print(f"Loss after epoch {epoch+1}: {running_loss}")
-    print(f"Avg acc after epoch {epoch+1}: {running_acc/len(examples))}")
+    print(f"Avg acc after epoch {epoch+1}: {running_acc/len(examples)}")
     avg_epoch_loss.append(running_loss/len(examples))
 
+# Save model for inference
+torch.save(model.state_dict(), 'model/rnn.model')
 #plot error
 plt.plot(train_counter, train_losses, color='blue', zorder=1)
 plt.scatter(list([i * len(examples) for i in range(EPOCHS)]), avg_epoch_loss, color='red', zorder=2)
