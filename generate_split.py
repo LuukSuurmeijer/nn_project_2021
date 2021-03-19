@@ -20,10 +20,19 @@ def randomsplit(corpus, split, outdir=""):
     train = corpus[0:trainsplit+1]
     test = corpus[trainsplit+1:]
 
-    with open(f"{outdir}train.tsv", 'w', encoding='utf-8') as tr:
+    path = "train_test_split"
+
+    try:
+        os.mkdir(path)
+    except OSError:
+        print("Creation of the directory %s failed" % path)
+    else:
+        print("Successfully created the directory %s " % path)
+
+    with open(f"{outdir}/train.tsv", 'w', encoding='utf-8') as tr:
         writer = csv.writer(tr, delimiter='\t', lineterminator='\n')
         writer.writerows(train)
-    with open(f"{outdir}test.tsv", 'w', encoding='utf-8') as te:
+    with open(f"{outdir}/test.tsv", 'w', encoding='utf-8') as te:
         writer = csv.writer(te, delimiter='\t', lineterminator='\n')
         writer.writerows(test)
 
