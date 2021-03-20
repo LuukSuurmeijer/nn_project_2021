@@ -40,10 +40,11 @@ def tokenize_and_align_labels(label_to_id, tokenizer, examples, text_column_name
 
 def get_label2id_list(data, label_column):
     label_list = set()
-    for i in data:
-        for label in i[label_column]:
-            label_list.add(label)
-    label_to_id = {l: i+1 for i, l in enumerate(label_list)}
+    for split in data.keys():
+        for i in data[split]:
+            for label in i[label_column]:
+                label_list.add(label)
+    label_to_id = {l: i for i, l in enumerate(label_list)}
     return label_to_id
 
 

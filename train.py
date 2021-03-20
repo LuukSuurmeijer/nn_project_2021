@@ -61,7 +61,7 @@ embedding_model = BertModel.from_pretrained('bert-base-uncased', output_hidden_s
 
 #dataset
 print("...Tokenizing data...")
-label_to_id = get_label2id_list(d['train'], 'tags')
+label_to_id = get_label2id_list(d, 'tags')
 tokenized_train = tokenize_and_align_labels(label_to_id, tokenizer, d['train'], 'words', 'tags')
 tokenized_test = tokenize_and_align_labels(label_to_id, tokenizer, d['test'], 'words', 'tags')
 examples = tokenized_train['input_ids']
