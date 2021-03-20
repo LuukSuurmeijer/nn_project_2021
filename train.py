@@ -63,57 +63,98 @@ embedding_model = BertModel.from_pretrained('bert-base-uncased', output_hidden_s
 print("...Tokenizing data...")
 label_to_id = get_label2id_list(d['train'], 'tags')
 tokenized_train = tokenize_and_align_labels(label_to_id, tokenizer, d['train'], 'words', 'tags')
+tokenized_test = tokenize_and_align_labels(label_to_id, tokenizer, d['test'], 'words', 'tags')
 examples = tokenized_train['input_ids']
+examples_test = tokenized_test['input_ids']
 
-
-print("TRAINING")
 
 ### TRAINING ###
-train_losses = []
-train_counter = []
-train_acc = []
-avg_epoch_loss = []
-for epoch in range(EPOCHS):
+def train():
+    print("TRAINING")
+    train_losses = []
+    train_counter = []
+    train_acc = []
+    avg_epoch_loss = []
+    for epoch in range(EPOCHS):
+        running_loss = 0.0
+        running_acc = 0.0
+        model.train()
+        for id, example in enumerate(tokenized_train['input_ids']):
+            #model.initHidden()
+            input = create_embeddings(embedding_model, tokenized_train['input_ids'][id]) #shape: (1, 86, 768)
+            target = tokenized_train['labels'][id] #shape: (1, 86)
+            optimizer.zero_grad()
+
+            pred = model(input) #forward pass
+
+            #reshape targets and predictions
+            pred = pred.view(-1, pred.shape[-1])
+            target = target.unsqueeze(0).view(-1)
+
+            loss = criterion(pred, target) #calculate loss
+            acc = accuracy(pred, target)
+
+            loss.backward() #backward pass
+            optimizer.step() #update weights
+
+            # print statistics
+            running_loss += loss.item()
+            running_acc += acc
+            train_losses.append(loss.item())
+            train_acc.append(acc)
+            train_counter.append((epoch*len(examples)) + id)
+            if id % 30 == 0 or id == len(examples):
+                #print(f"Epoch: {epoch+1} | example: {id}/{len(examples)} | loss: {loss.item()}")
+                print("Epoch: {:<12} | acc: {:<12} | loss: {:<12}".format(f"{epoch+1} ({id}/{len(examples)})", acc ,loss.item()))
+
+        print(f"Loss after epoch {epoch+1}: {running_loss}")
+        print(f"Avg acc after epoch {epoch+1}: {running_acc/len(examples)}")
+        avg_epoch_loss.append(running_loss/len(examples))
+
+    # Save model for inference
+    torch.save(model.state_dict(), 'model/rnn.model')
+
+    # plot error
+    plt.plot(train_counter, train_losses, color='blue', zorder=1)
+    plt.scatter(list([i * len(examples) for i in range(EPOCHS)]), avg_epoch_loss, color='red', zorder=2)
+    plt.xlabel('Number of training examples seen')
+    plt.ylabel('Cross Entropy Loss')
+    plt.show()
+
+### EVALUATING ###
+def test():
+    print("EVALUATING THE MODEL")
+    model.load_state_dict(torch.load('model/rnn.model'))
+    model.eval()
+
     running_loss = 0.0
     running_acc = 0.0
-    model.train()
-    for id, example in enumerate(tokenized_train['input_ids']):
-        #model.initHidden()
-        input = create_embeddings(embedding_model, tokenized_train['input_ids'][id]) #shape: (1, 86, 768)
-        target = tokenized_train['labels'][id]
-        optimizer.zero_grad()
 
-        pred = model(input) #forward pass
+    with torch.no_grad():
+        for id, example in enumerate(tokenized_test['input_ids']):
+            # model.initHidden()
+            input = create_embeddings(embedding_model, tokenized_test['input_ids'][id])  # shape: (1, 86, 768)
+            target = tokenized_test['labels'][id]
 
-        #reshape targets and predictions
-        pred = pred.view(-1, pred.shape[-1])
-        target = target.unsqueeze(0).view(-1)
+            pred = model(input)  # forward pass
 
-        loss = criterion(pred, target) #calculate loss
-        acc = accuracy(pred, target)
+            # reshape targets and predictions
+            pred = pred.view(-1, pred.shape[-1])
+            target = target.unsqueeze(0).view(-1)
 
-        loss.backward() #backward pass
-        optimizer.step() #update weights
+            label_ids = torch.argmax(pred, dim=1)
+            # print([id_to_label[i.item()] for i in label_ids])
 
-        # print statistics
-        running_loss += loss.item()
-        running_acc += acc
-        train_losses.append(loss.item())
-        train_acc.append(acc)
-        train_counter.append((epoch*len(examples)) + id)
-        if id % 30 == 0 or id == len(examples):
-            #print(f"Epoch: {epoch+1} | example: {id}/{len(examples)} | loss: {loss.item()}")
-            print("Epoch: {:<12} | acc: {:<12} | loss: {:<12}".format(f"{epoch+1} ({id}/{len(examples)})", acc ,loss.item()))
+            loss = criterion(pred, target)  # calculate loss
+            acc = accuracy(pred, target)
 
-    print(f"Loss after epoch {epoch+1}: {running_loss}")
-    print(f"Avg acc after epoch {epoch+1}: {running_acc/len(examples)}")
-    avg_epoch_loss.append(running_loss/len(examples))
+            running_loss += loss.item()
+            running_acc += acc
 
-# Save model for inference
-torch.save(model.state_dict(), 'model/rnn.model')
-#plot error
-plt.plot(train_counter, train_losses, color='blue', zorder=1)
-plt.scatter(list([i * len(examples) for i in range(EPOCHS)]), avg_epoch_loss, color='red', zorder=2)
-plt.xlabel('Number of training examples seen')
-plt.ylabel('Cross Entropy Loss')
-plt.show()
+    print(f'Average Loss per example: {running_loss / len(examples_test)}')
+    print(f'Average accuracy per example: {running_acc / len(examples_test)}')
+
+
+train()
+
+test()
