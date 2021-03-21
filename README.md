@@ -86,9 +86,9 @@ To train the model call `train.py`. The following arguments can be specified:
 
 `--lr`          learning rate                        default: `0.001`
 
-To see a list of all arguments do `python train.py -h`
+To see a list of all arguments do `python train.py -h`.
 
-Running `python train.py` will initialize the default model. Data will be loaded and tokenized and the model will be trained for 15 epochs (mini-batchsize of 1 sentence) using Cross Entropy Loss. The model will be saved to `model/rnn.model` and error will be plotted. 
+Running `python train.py` will initialize the default model. Data will be loaded and tokenized and the model will be trained for 15 epochs (mini-batchsize of 1 sentence) using Cross Entropy Loss. If CUDA is available the model will be trained on CUDA, else on GPU. After training, the model will be saved to `model/rnn.model` and error will be plotted. 
 
 TO-DO: AT THE MOMENT CALLING `train.py` also runs the testing, we might want to change that
 
