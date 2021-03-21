@@ -41,12 +41,15 @@ def accuracy(preds, targets):
 
 
 parser = argparse.ArgumentParser(description='Train the neural network.')
-parser.add_argument('-l', '--num_layers', type=int, help='number of recurrent layers')
-parser.add_argument('-e', '--epochs', type=int, help='number of epochs')
-parser.add_argument('-u', '--hiddens', type=int, help='number of hidden units per layer')
-parser.add_argument('-t', '--type', help="LSTM/RNN")
+parser.add_argument('--num_layers', type=int, default=1, help='number of recurrent layers')
+parser.add_argument('--epochs', type=int, default=15, help='number of epochs')
+parser.add_argument('--hiddens', type=int, default=200, help='number of hidden units per layer')
+parser.add_argument('--type', default='RNN', help="LSTM/RNN")
+parser.add_argument('--batchsize', type=int, default=1, help="Batch size, must be 1 for CPU (i think)")
+parser.add_argument('--lr', type=float, default=0.001, help="learning rate")
 args = parser.parse_args()
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 HIDDEN_DIM = args.hiddens
 EMBEDDING_DIM = 768
@@ -58,9 +61,9 @@ EPOCHS = args.epochs
 model = RNNTagger(embedding_dim=EMBEDDING_DIM, hidden_dim=HIDDEN_DIM, tagset_size=TAGSET_SIZE, n_layers=args.num_layers, type=args.type)
 
 summarize(model)
+print(f"Using {args.type} on {device}")
 
-
-optimizer = optim.Adam(model.parameters())
+optimizer = optim.Adam(model.parameters(), lr=args.lr)
 criterion = nn.CrossEntropyLoss(ignore_index=-100) #ignore padding ?
 
 #load the data
@@ -91,12 +94,12 @@ tokenize_and_align_labels_p = partial(
 #training dataloader
 train_dataset = train_dataset.map(tokenize_and_align_labels_p, batched=True)
 train_dataset.set_format(type='torch', columns=['input_ids', 'token_type_ids', 'attention_mask', 'labels'])
-train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=1)
+train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=args.batchsize)
 
 #testing dataloader
 test_dataset = test_dataset.map(tokenize_and_align_labels_p, batched=True)
 test_dataset.set_format(type='torch', columns=['input_ids', 'token_type_ids', 'attention_mask', 'labels'])
-test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=1)
+test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=args.batchsize)
 
 
 ### TRAINING ###
@@ -112,8 +115,8 @@ def train():
         model.train()
         for id, example in enumerate(train_dataloader):
 
-            input = create_embeddings(embedding_model, example['input_ids']) #shape: (1, 86, 768)
-            target = example['labels']
+            input = create_embeddings(embedding_model, example['input_ids']).to(device) #shape: (1, 86, 768)
+            target = example['labels'].to(device)
 
 
             optimizer.zero_grad()

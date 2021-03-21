@@ -13,9 +13,9 @@ class RNNTagger(nn.Module):
         # The RNN takes word embeddings as inputs, and outputs hidden states
         # with dimensionality hidden_dim.
         if type == 'LSTM':
-            self.input2hidden = nn.RNN(embedding_dim, hidden_dim, batch_first=True, num_layers=n_layers) #dim: (embedding_dim, hidden_dim) tanh non-linearity
-        else:
             self.input2hidden = nn.LSTM(embedding_dim, hidden_dim, batch_first=True, num_layers=n_layers) #dim: (embedding_dim, hidden_dim) tanh non-linearity
+        else:
+            self.input2hidden = nn.RNN(embedding_dim, hidden_dim, batch_first=True, num_layers=n_layers) #dim: (embedding_dim, hidden_dim) tanh non-linearity
         # The linear layer that maps from hidden state space to tag space
         self.hidden2tag = nn.Linear(hidden_dim, tagset_size) #dim: (hidden_dim, tagset_size) linear
 

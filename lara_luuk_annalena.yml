@@ -3,6 +3,7 @@ name: lara_luuk_annalena
 dependencies:
   - python>=3.6
   - pip
+  - matplotlib
   - pip:
     - conllu==4.0
     - datasets
