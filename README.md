@@ -60,7 +60,7 @@ Example of use:
 
 Words are lowercased and punctuation from dates and numbers etc. is removed in lines 60-80 in `TagDataset.py`
 
-The method `tokenize_and_align_labels` in `embeddings.py` is adapted from [huggingface](https://github.com/huggingface/transformers/blob/master/examples/token-classification/run_ner.py). Tokens are mapped to der Word IDs and sentences are padded to the longest sentence. Labels are aligned with the padded sentences taking care of the padding, the splitting of words in several parts with the same ID (e.g. #embedding #s) and special tokens ([SEP] and [CLS]) by assigning those the lable -100. 
+The method `tokenize_and_align_labels` in `embeddings.py` is adapted from [huggingface](https://github.com/huggingface/transformers/blob/master/examples/token-classification/run_ner.py). Tokens are mapped to der Word IDs and sentences are padded to the longest sentence. Labels are aligned with the padded sentences taking care of the padding, the splitting of words in several parts with the same ID (e.g. #embedding #s) and special tokens ([SEP] and [CLS]) by assigning those the lable `-100`. 
 
 ### Embeddings
 
