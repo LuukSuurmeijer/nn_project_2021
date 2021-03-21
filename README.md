@@ -77,6 +77,7 @@ Shoud we describe the models here or is this part of the report?
 ### Training
 
 To train the model call `train.py` TO-DO: ARGUMENT THAT SPECFIES MODEL This will initialize the specified model with a hidden dimension of 100. Data will be loaded and tokenized and the model will be trained for 15 epochs (mini-batchsize of 1 sentence) using Cross Entropy Loss. The model will be saved to `model/model_name` and error will be plotted. 
+AT THE MOMENT CALLING `train.py` also runs the testing, we might want to change that
 
 ### Testing
 
