@@ -91,7 +91,7 @@ def train():
             pred = pred.view(-1, pred.shape[-1])
             target = target.unsqueeze(0).view(-1)
 
-            loss = criterion(pred, target) #calculate loss
+            loss = criterion(pred, target)  # calculate loss
             acc = accuracy(pred, target)
 
             loss.backward() #backward pass
@@ -124,6 +124,7 @@ def train():
 ### EVALUATING ###
 def test():
     print("EVALUATING THE MODEL")
+    # TODO: We need to make the file path for loading the state dict an argument depending on which model we train?
     model.load_state_dict(torch.load('model/rnn.model'))
     model.eval()
 
@@ -158,3 +159,38 @@ def test():
 train()
 
 test()
+
+
+def look_at_test_example(sentence_id):
+    """
+    print a testing example to the console
+    :param sentence_id: id of the testing example that should be looked at
+    """
+    #  TODO: We need to make the file path for loading the state dict an argument depending on which model we train?
+    model.load_state_dict(torch.load('model/rnn.model'))
+    model.eval()
+
+    input = create_embeddings(embedding_model, tokenized_test['input_ids'][sentence_id])  # shape: (1, 86, 768)
+
+    pred = model(input)  # forward pass
+    # TODO: I think I need the target to ignore -100 labels when inferenceing
+    target = list(tokenized_test['labels'][sentence_id])
+    to_be_ignored = [i for i, label_id in enumerate(target) if label_id == -100]
+    target_cleaned = target
+    for i in to_be_ignored:
+        target_cleaned.pop(i)
+    # reshape targets and predictions
+    pred = pred.view(-1, pred.shape[-1])
+
+    label_ids = torch.argmax(pred, dim=1)
+    sentence = d['test']['words'][sentence_id]  # list of shape: (1, sent_length)
+    # this should iterate over label_ids and check for each id what the corresponding key in the label_to_ids dict is
+    predicted_labels = [list(label_to_id.keys())[list(label_to_id.values()).index(id)] for id in label_ids]
+    labels_cleaned = predicted_labels
+    for i in to_be_ignored:
+        labels_cleaned.pop(i)
+
+    print(f"Test example {sentence_id}")
+    print(f"Words: {sentence}")
+    print(f"Predicted tags: {labels_cleaned}")
+    print(f"Correct tags: {d['test']['tags'][sentence_id]}")
