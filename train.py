@@ -11,8 +11,9 @@ from transformers import AutoTokenizer
 #our functions
 from embeddings import *
 from model import RNNTagger
-#plotting outputs
+#plotting outputs/argparse
 import matplotlib.pyplot as plt
+import argparse
 
 def summarize(model):
     data = {name: [name, [*param.data.shape], param.numel()] for name, param in model.named_parameters() if param.requires_grad}
@@ -36,14 +37,22 @@ def accuracy(preds, targets):
     return np.round(num_correct / len(targets), 3)
 
 
-HIDDEN_DIM = 100
+parser = argparse.ArgumentParser(description='Train the neural network.')
+parser.add_argument('-l', '--num_layers', type=int, help='number of recurrent layers')
+parser.add_argument('-e', '--epochs', type=int, help='number of epochs')
+parser.add_argument('-u', '--hiddens', type=int, help='number of hidden units per layer')
+parser.add_argument('-t', '--type', help="LSTM/RNN")
+args = parser.parse_args()
+
+
+HIDDEN_DIM = args.hiddens
 EMBEDDING_DIM = 768
 TAGSET_SIZE = 40
-EPOCHS = 15
+EPOCHS = args.epochs
 
 
 #create model, define loss function and optimizer
-model = RNNTagger(embedding_dim=EMBEDDING_DIM, hidden_dim=HIDDEN_DIM, tagset_size=TAGSET_SIZE)
+model = RNNTagger(embedding_dim=EMBEDDING_DIM, hidden_dim=HIDDEN_DIM, tagset_size=TAGSET_SIZE, n_layers=args.num_layers, type=args.type)
 
 summarize(model)
 
@@ -67,6 +76,18 @@ tokenized_test = tokenize_and_align_labels(label_to_id, tokenizer, d['test'], 'w
 examples = tokenized_train['input_ids']
 examples_test = tokenized_test['input_ids']
 
+print(type(tokenized_train))
+
+train = d['train']
+dataset = d.map(lambda e: tokenizer(e['train']['words'], truncation=True, padding='max_length'), batched=True)
+
+dataloader = torch.utils.data.DataLoader(dataset, batch_size=1)
+
+
+for id, example in enumerate(dataloader):
+    print(id, example)
+
+sys.exit()
 
 ### TRAINING ###
 def train():
