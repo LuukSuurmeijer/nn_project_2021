@@ -68,11 +68,7 @@ The method `create_embeddings` is given a tokenized sentences and an embedding m
 
 ### Model
 
-TO-DO: We want to add a second class for an LSTM 
-
-`Model.py` initializes the models used for training. There are either `RNNTagger` or ??? available.
-
-Shoud we describe the models here or is this part of the report?
+`Model.py` contains the method to initialize the model used for training. There are either a simple RNN model or a LSTM model available.
 
 ### Training
 
