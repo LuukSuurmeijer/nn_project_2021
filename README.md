@@ -77,12 +77,18 @@ Shoud we describe the models here or is this part of the report?
 ### Training
 
 To train the model call `train.py`. The following arguments can be specified:
-`-- num_layers  number of recurrent layers          default: 1`
-`--epochs       number of epochs                    default: 15`
-`--hiddens      number of hidden units per layer    default: 200`
-`--type         model type (LSTM or RNN)            default: 'RNN'`
-`--batchsize    batch size                          default: 1`
-`--lr          learning rate                       default: 0.001`
+
+`--num_layers`   number of recurrent layers, default: `1`
+
+`--epochs`       number of epochs, default: `15`
+
+`--hiddens`      number of hidden units per layer, default: `200`
+
+`--type`         model type (LSTM or RNN)            default: `'RNN'`
+
+`--batchsize`   batch size                          default: `1`
+
+`--lr`          learning rate                        default: `0.001`
 
 To see a list of all arguments do `python train.py -h`
 
