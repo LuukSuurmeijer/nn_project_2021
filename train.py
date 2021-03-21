@@ -173,22 +173,18 @@ def look_at_test_example(sentence_id):
     input = create_embeddings(embedding_model, tokenized_test['input_ids'][sentence_id])  # shape: (1, 86, 768)
 
     pred = model(input)  # forward pass
-    # TODO: I think I need the target to ignore -100 labels when inferenceing
-    target = list(tokenized_test['labels'][sentence_id])
-    to_be_ignored = [i for i, label_id in enumerate(target) if label_id == -100]
-    target_cleaned = target
-    for i in to_be_ignored:
-        target_cleaned.pop(i)
-    # reshape targets and predictions
-    pred = pred.view(-1, pred.shape[-1])
 
+    target = list(tokenized_test['labels'][sentence_id])
     label_ids = torch.argmax(pred, dim=1)
-    sentence = d['test']['words'][sentence_id]  # list of shape: (1, sent_length)
+
     # this should iterate over label_ids and check for each id what the corresponding key in the label_to_ids dict is
     predicted_labels = [list(label_to_id.keys())[list(label_to_id.values()).index(id)] for id in label_ids]
-    labels_cleaned = predicted_labels
-    for i in to_be_ignored:
-        labels_cleaned.pop(i)
+
+    to_be_ignored = [i for i, label_id in enumerate(target) if label_id == -100]
+    target_cleaned = [label_id for i, label_id in enumerate(target) if i not in to_be_ignored]
+    labels_cleaned = [label for i, label in enumerate(predicted_labels) if i not in to_be_ignored]
+
+    sentence = d['test']['words'][sentence_id]  # list of shape: (1, sent_length)
 
     print(f"Test example {sentence_id}")
     print(f"Words: {sentence}")
