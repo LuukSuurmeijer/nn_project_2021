@@ -14,6 +14,9 @@ from model import RNNTagger
 #plotting outputs/argparse
 import matplotlib.pyplot as plt
 import argparse
+from functools import partial
+
+import sys
 
 def summarize(model):
     data = {name: [name, [*param.data.shape], param.numel()] for name, param in model.named_parameters() if param.requires_grad}
@@ -63,31 +66,38 @@ criterion = nn.CrossEntropyLoss(ignore_index=-100) #ignore padding ?
 #load the data
 d = datasets.load_dataset('TagDataset.py', data_dir='train_test_split/')
 
-#tokenize the data
+#load the tokenizer and embeddings
 print("...Generating embeddings...")
 tokenizer = AutoTokenizer.from_pretrained('bert-base-uncased', use_fast=True, is_split_into_words=True)
 embedding_model = BertModel.from_pretrained('bert-base-uncased', output_hidden_states = True)
-
-#dataset
-print("...Tokenizing data...")
 label_to_id = get_label2id_list(d, 'tags')
-tokenized_train = tokenize_and_align_labels(label_to_id, tokenizer, d['train'], 'words', 'tags')
-tokenized_test = tokenize_and_align_labels(label_to_id, tokenizer, d['test'], 'words', 'tags')
-examples = tokenized_train['input_ids']
-examples_test = tokenized_test['input_ids']
 
-print(type(tokenized_train))
+#preparing the datasets
+print("...Tokenizing data...")
 
-train = d['train']
-dataset = d.map(lambda e: tokenizer(e['train']['words'], truncation=True, padding='max_length'), batched=True)
+#train and test
+train_dataset = d['train']
+test_dataset = d['test']
 
-dataloader = torch.utils.data.DataLoader(dataset, batch_size=1)
+#prepare tokenization function
+tokenize_and_align_labels_p = partial(
+    tokenize_and_align_labels,
+    label_to_id=label_to_id,
+    tokenizer=tokenizer,
+    text_column_name='words',
+    label_column_name='tags',
+    )
 
+#training dataloader
+train_dataset = train_dataset.map(tokenize_and_align_labels_p, batched=True)
+train_dataset.set_format(type='torch', columns=['input_ids', 'token_type_ids', 'attention_mask', 'labels'])
+train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=1)
 
-for id, example in enumerate(dataloader):
-    print(id, example)
+#testing dataloader
+test_dataset = test_dataset.map(tokenize_and_align_labels_p, batched=True)
+test_dataset.set_format(type='torch', columns=['input_ids', 'token_type_ids', 'attention_mask', 'labels'])
+test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=1)
 
-sys.exit()
 
 ### TRAINING ###
 def train():
@@ -100,10 +110,12 @@ def train():
         running_loss = 0.0
         running_acc = 0.0
         model.train()
-        for id, example in enumerate(tokenized_train['input_ids']):
-            #model.initHidden()
-            input = create_embeddings(embedding_model, tokenized_train['input_ids'][id]) #shape: (1, 86, 768)
-            target = tokenized_train['labels'][id] #shape: (1, 86)
+        for id, example in enumerate(train_dataloader):
+
+            input = create_embeddings(embedding_model, example['input_ids']) #shape: (1, 86, 768)
+            target = example['labels']
+
+
             optimizer.zero_grad()
 
             pred = model(input) #forward pass
@@ -123,14 +135,13 @@ def train():
             running_acc += acc
             train_losses.append(loss.item())
             train_acc.append(acc)
-            train_counter.append((epoch*len(examples)) + id)
-            if id % 30 == 0 or id == len(examples):
-                #print(f"Epoch: {epoch+1} | example: {id}/{len(examples)} | loss: {loss.item()}")
-                print("Epoch: {:<12} | acc: {:<12} | loss: {:<12}".format(f"{epoch+1} ({id}/{len(examples)})", acc ,loss.item()))
+            train_counter.append((epoch*len(train_dataloader)) + id)
+            if id % 30 == 0 or id == len(train_dataloader):
+                print("Epoch: {:<12} | acc: {:<12} | loss: {:<12}".format(f"{epoch+1} ({id}/{len(train_dataloader)})", acc ,loss.item()))
 
         print(f"Loss after epoch {epoch+1}: {running_loss}")
-        print(f"Avg acc after epoch {epoch+1}: {running_acc/len(examples)}")
-        avg_epoch_loss.append(running_loss/len(examples))
+        print(f"Avg acc after epoch {epoch+1}: {running_acc/len(train_dataloader)}")
+        avg_epoch_loss.append(running_loss/len(train_dataloader))
 
     # Save model for inference
     torch.save(model.state_dict(), 'model/rnn.model')
@@ -153,10 +164,10 @@ def test():
     running_acc = 0.0
 
     with torch.no_grad():
-        for id, example in enumerate(tokenized_test['input_ids']):
+        for id, example in enumerate(test_dataloader):
             # model.initHidden()
-            input = create_embeddings(embedding_model, tokenized_test['input_ids'][id])  # shape: (1, 86, 768)
-            target = tokenized_test['labels'][id]
+            input = create_embeddings(embedding_model, example['input_ids'])  # shape: (batch_size, 86, 768)
+            target = example['labels']
 
             pred = model(input)  # forward pass
 
@@ -173,8 +184,8 @@ def test():
             running_loss += loss.item()
             running_acc += acc
 
-    print(f'Average Loss per example: {running_loss / len(examples_test)}')
-    print(f'Average accuracy per example: {running_acc / len(examples_test)}')
+    print(f'Average Loss per example: {running_loss / len(test_dataloader)}')
+    print(f'Average accuracy per example: {running_acc / len(test_dataloader)}')
 
 
 train()
