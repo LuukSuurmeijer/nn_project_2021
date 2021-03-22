@@ -35,7 +35,7 @@ def summarize(model):
 
 #adapted from https://github.com/bentrevett/pytorch-pos-tagging/blob/master/1%20-%20BiLSTM%20for%20PoS%20Tagging.ipynb
 def accuracy(preds, targets):
-    max_preds = preds.argmax(dim = 1, keepdim = True).squeeze() # get the index of the max probability
+    max_preds = preds.argmin(dim = 1, keepdim = True).squeeze() # get the index of the max probability
     targets = targets
     correct = [i for i in range(len(targets)) if max_preds[i] == targets[i] and targets[i] != -100] #correct labels except the pads
     num_correct = len(correct)
@@ -51,15 +51,17 @@ parser.add_argument('--batchsize', type=int, default=1, help="Batch size, must b
 parser.add_argument('--lr', type=float, default=0.001, help="learning rate")
 args = parser.parse_args()
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 HIDDEN_DIM = args.hiddens
 EMBEDDING_DIM = 768
 TAGSET_SIZE = 40
 EPOCHS = args.epochs
 
-wandb.init()
+wandb.init(project='nn_project_2021')
 wandb.config.update(args)
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 
 #create model, define loss function and optimizer
 model = RNNTagger(embedding_dim=EMBEDDING_DIM, hidden_dim=HIDDEN_DIM, tagset_size=TAGSET_SIZE, n_layers=args.num_layers, type=args.type).to(device)
@@ -120,8 +122,6 @@ def train():
         running_acc = 0.0
         model.train()
         for id, example in enumerate(train_dataloader):
-            if id == 50:
-                break
             ex = example['input_ids'].to(device)
             input = create_embeddings(embedding_model, ex).to(device) #shape: (1, 86, 768)
             target = example['labels'].to(device)
@@ -146,7 +146,7 @@ def train():
             running_acc += acc
             train_losses.append(loss.item())
             train_acc.append(acc)
-            train_counter.append((epoch*len(train_dataloader)) + id)
+            train_counter.append(((epoch*len(train_dataloader)) + id)*args.batchsize)
 
             wandb.log({"loss" : loss, "accuracy" : acc})
 
@@ -191,8 +191,9 @@ def test():
     with torch.no_grad():
         for id, example in enumerate(test_dataloader):
             # model.initHidden()
-            input = create_embeddings(embedding_model, example['input_ids'])  # shape: (batch_size, 86, 768)
-            target = example['labels']
+            ex = example['input_ids'].to(device)
+            input = create_embeddings(embedding_model, ex).to(device)  # shape: (batch_size, 86, 768)
+            target = example['labels'].to(device)
 
             pred = model(input)  # forward pass
 
