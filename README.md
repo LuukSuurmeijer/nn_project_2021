@@ -18,9 +18,11 @@ $ conda activate lara_luuk_annalena
 ```
 
 ## Data Preprocessing
+The data for training our model are the files `chtb 0223.gold conll`, `phoenix 0001.gold conll`, `pri 0016.gold conll` and `wsj 1681.gold conll` from the [Ontonotes 4.0](https://catalog.ldc.upenn.edu/LDC2011T03) dataset. Running `cat *.txt >> [OUTPUT FILE]` or `type *.txt > [OUTPUT FILE]` (on Windows) concatenates the files into one file.
+
 Running `python Data_Preprocessing.py [INPUT FILE] [OUTPUT DIR]` will create a directory with the files `sample.tsv` and `cleaned.conll` (containing data) and a `sample.info` file with information about the data.
 
-Run `python generate_split.py sample_cleaned.conll/sample.tsv --outdir train_test_split --split 0.9` will create a new directory with the train and test splits.
+Run `python generate_split.py sample_cleaned.conll/sample.tsv --outdir train_test_split --split 0.9` to create a new directory with the train and test splits.
 
 ## Data loading
 
@@ -66,7 +68,7 @@ The method `tokenize_and_align_labels` in `embeddings.py` is adapted from [huggi
 
 The method `create_embeddings` is given a tokenized sentences and an embedding model and returns the embedded sentence (dimensions 1 x max sentence length x 768). The method is called during training and creates embeddings one by one. 
 
-### Model
+## Model
 
 `Model.py` contains the method to initialize the model used for training. There are either a simple RNN model or a LSTM model available.
 
