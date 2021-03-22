@@ -60,7 +60,7 @@ Example of use:
 
 Words are lowercased and punctuation from dates and numbers etc. is removed in lines 60-80 in `TagDataset.py`
 
-The method `tokenize_and_align_labels` in `embeddings.py` is adapted from [huggingface](https://github.com/huggingface/transformers/blob/master/examples/token-classification/run_ner.py). Tokens are mapped to der Word IDs and sentences are padded to the longest sentence. Labels are aligned with the padded sentences taking care of the padding, the splitting of words in several parts with the same ID (e.g. #embedding #s) and special tokens ([SEP] and [CLS]) by assigning those the lable -100. 
+The method `tokenize_and_align_labels` in `embeddings.py` is adapted from [huggingface](https://github.com/huggingface/transformers/blob/master/examples/token-classification/run_ner.py). Tokens are mapped to der Word IDs and sentences are padded to the longest sentence. Labels are aligned with the padded sentences taking care of the padding, the splitting of words in several parts with the same ID (e.g. #embedding #s) and special tokens ([SEP] and [CLS]) by assigning those the lable `-100`. 
 
 ### Embeddings
 
@@ -68,16 +68,29 @@ The method `create_embeddings` is given a tokenized sentences and an embedding m
 
 ### Model
 
-TO-DO: We want to add a second class for an LSTM 
-
-`Model.py` initializes the models used for training. There are either `RNNTagger` or ??? available.
-
-Shoud we describe the models here or is this part of the report?
+`Model.py` contains the method to initialize the model used for training. There are either a simple RNN model or a LSTM model available.
 
 ### Training
 
-To train the model call `train.py` TO-DO: ARGUMENT THAT SPECFIES MODEL This will initialize the specified model with a hidden dimension of 100. Data will be loaded and tokenized and the model will be trained for 15 epochs (mini-batchsize of 1 sentence) using Cross Entropy Loss. The model will be saved to `model/model_name` and error will be plotted. 
-AT THE MOMENT CALLING `train.py` also runs the testing, we might want to change that
+To train the model call `train.py`. The following arguments can be specified:
+
+`--num_layers`   number of recurrent layers, default: `1`
+
+`--epochs`       number of epochs, default: `15`
+
+`--hiddens`      number of hidden units per layer, default: `200`
+
+`--type`         model type (LSTM or RNN)            default: `'RNN'`
+
+`--batchsize`   batch size                          default: `1`
+
+`--lr`          learning rate                        default: `0.001`
+
+To see a list of all arguments do `python train.py -h`.
+
+Running `python train.py` will initialize the default model. Data will be loaded and tokenized and the model will be trained for 15 epochs (mini-batchsize of 1 sentence) using Cross Entropy Loss. If CUDA is available the model will be trained on CUDA, else on GPU. After training, the model will be saved to `model/rnn.model` and error will be plotted. 
+
+TO-DO: AT THE MOMENT CALLING `train.py` also runs the testing, we might want to change that
 
 ### Testing
 

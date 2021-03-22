@@ -151,7 +151,7 @@ def train():
 
     # plot error
     plt.plot(train_counter, train_losses, color='blue', zorder=1)
-    plt.scatter(list([i * len(examples) for i in range(EPOCHS)]), avg_epoch_loss, color='red', zorder=2)
+    plt.scatter(list([i * len(train_dataset) for i in range(EPOCHS)]), avg_epoch_loss, color='red', zorder=2)
     plt.xlabel('Number of training examples seen')
     plt.ylabel('Cross Entropy Loss')
     plt.show()
@@ -201,15 +201,15 @@ def look_at_test_example(sentence_id):
     print a testing example to the console
     :param sentence_id: id of the testing example that should be looked at
     """
-    #  TODO: We need to make the file path for loading the state dict an argument depending on which model we train?
+
     model.load_state_dict(torch.load('model/rnn.model'))
     model.eval()
 
-    input = create_embeddings(embedding_model, tokenized_test['input_ids'][sentence_id])  # shape: (1, 86, 768)
+    input = create_embeddings(embedding_model, test_dataset['input_ids'][sentence_id])  # shape: (1, 86, 768)
 
     pred = model(input)  # forward pass
 
-    target = list(tokenized_test['labels'][sentence_id])
+    target = list(test_dataset['labels'][sentence_id])
     label_ids = torch.argmax(pred, dim=1)
 
     # this should iterate over label_ids and check for each id what the corresponding key in the label_to_ids dict is
