@@ -166,7 +166,7 @@ def train():
             if args.batchsize == 1 and id % 30 == 0:
                 print("Epoch: {:<12} | acc: {:<12} | loss: {:<12}".format(f"{epoch+1} ({id}/{len(train_dataloader)})",
                                                                           acc, loss.item()))
-            elif args.batchsize > 1 and id == len(train_dataloader):
+            elif args.batchsize > 1 and id == len(train_dataloader)-1:
                 print("Epoch: {:<12} | acc: {:<12} | loss: {:<12}".format(f"{epoch + 1} ({id}/{len(train_dataloader)})",
                                                                           print_acc, print_loss))
 
