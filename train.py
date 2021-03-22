@@ -13,10 +13,12 @@ from embeddings import *
 from model import RNNTagger
 #plotting outputs/argparse
 import matplotlib.pyplot as plt
+import wandb
 import argparse
 from functools import partial
 
 import sys
+
 
 def summarize(model):
     data = {name: [name, [*param.data.shape], param.numel()] for name, param in model.named_parameters() if param.requires_grad}
@@ -37,7 +39,7 @@ def accuracy(preds, targets):
     targets = targets
     correct = [i for i in range(len(targets)) if max_preds[i] == targets[i] and targets[i] != -100] #correct labels except the pads
     num_correct = len(correct)
-    return np.round(num_correct / len(targets), 3)
+    return np.round(num_correct / len(targets), 6)
 
 
 parser = argparse.ArgumentParser(description='Train the neural network.')
@@ -56,6 +58,8 @@ EMBEDDING_DIM = 768
 TAGSET_SIZE = 40
 EPOCHS = args.epochs
 
+wandb.init()
+wandb.config.update(args)
 
 #create model, define loss function and optimizer
 model = RNNTagger(embedding_dim=EMBEDDING_DIM, hidden_dim=HIDDEN_DIM, tagset_size=TAGSET_SIZE, n_layers=args.num_layers, type=args.type).to(device)
@@ -104,18 +108,22 @@ test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=args.batc
 
 ### TRAINING ###
 def train():
+    wandb.watch(model)
     print("TRAINING")
     train_losses = []
     train_counter = []
     train_acc = []
     avg_epoch_loss = []
+    avg_epoch_acc = []
     for epoch in range(EPOCHS):
         running_loss = 0.0
         running_acc = 0.0
         model.train()
         for id, example in enumerate(train_dataloader):
-
-            input = create_embeddings(embedding_model, example['input_ids']).to(device) #shape: (1, 86, 768)
+            if id == 50:
+                break
+            ex = example['input_ids'].to(device)
+            input = create_embeddings(embedding_model, ex).to(device) #shape: (1, 86, 768)
             target = example['labels'].to(device)
 
 
@@ -139,12 +147,16 @@ def train():
             train_losses.append(loss.item())
             train_acc.append(acc)
             train_counter.append((epoch*len(train_dataloader)) + id)
+
+            wandb.log({"loss" : loss, "accuracy" : acc})
+
             if id % 30 == 0 or id == len(train_dataloader):
                 print("Epoch: {:<12} | acc: {:<12} | loss: {:<12}".format(f"{epoch+1} ({id}/{len(train_dataloader)})", acc ,loss.item()))
 
         print(f"Loss after epoch {epoch+1}: {running_loss}")
         print(f"Avg acc after epoch {epoch+1}: {running_acc/len(train_dataloader)}")
         avg_epoch_loss.append(running_loss/len(train_dataloader))
+        avg_epoch_acc.append(running_acc/len(train_dataloader))
 
     # Save model for inference
     torch.save(model.state_dict(), 'model/rnn.model')
@@ -154,7 +166,17 @@ def train():
     plt.scatter(list([i * len(train_dataset) for i in range(EPOCHS)]), avg_epoch_loss, color='red', zorder=2)
     plt.xlabel('Number of training examples seen')
     plt.ylabel('Cross Entropy Loss')
-    plt.show()
+    plt.savefig(f'loss_{args.type}_{args.hiddens}_{args.num_layers}_{args.lr}.pdf')
+    plt.clf()
+
+    # plot accuracy
+    plt.plot(train_counter, train_acc, color='blue', zorder=1)
+    #plt.scatter(list([i * len(train_dataset) for i in range(EPOCHS)]), avg_epoch_acc, color='red', zorder=2)
+    plt.xlabel('Number of training examples seen')
+    plt.ylabel('Accuracy')
+    plt.savefig(f'acc_{args.type}_{args.hiddens}_{args.num_layers}_{args.lr}.pdf')
+    plt.clf()
+
 
 ### EVALUATING ###
 def test():
