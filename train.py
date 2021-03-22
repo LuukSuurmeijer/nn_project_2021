@@ -35,7 +35,8 @@ def summarize(model):
 
 #adapted from https://github.com/bentrevett/pytorch-pos-tagging/blob/master/1%20-%20BiLSTM%20for%20PoS%20Tagging.ipynb
 def accuracy(preds, targets):
-    max_preds = preds.argmin(dim = 1, keepdim = True).squeeze() # get the index of the max probability
+    preds = preds * -1
+    max_preds = preds.argmax(dim = 1, keepdim = True).squeeze() # get the index of the max probability
     targets = targets
     correct = [i for i in range(len(targets)) if max_preds[i] == targets[i] and targets[i] != -100] #correct labels except the pads
     num_correct = len(correct)
