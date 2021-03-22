@@ -18,7 +18,7 @@ $ conda activate lara_luuk_annalena
 ```
 
 ## Data Preprocessing
-The data for training our model are the files `chtb 0223.gold conll`, `phoenix 0001.gold conll`, `pri 0016.gold conll` and `wsj 1681.gold conll` from the [Ontonotes 4.0] dataset (https://catalog.ldc.upenn.edu/LDC2011T03). Running `cat *.txt >> [OUTPUT FILE]` or `type *.txt > [OUTPUT FILE]` (on Windows) concatenates the files into one file.
+The data for training our model are the files `chtb 0223.gold conll`, `phoenix 0001.gold conll`, `pri 0016.gold conll` and `wsj 1681.gold conll` from the [Ontonotes 4.0](https://catalog.ldc.upenn.edu/LDC2011T03) dataset. Running `cat *.txt >> [OUTPUT FILE]` or `type *.txt > [OUTPUT FILE]` (on Windows) concatenates the files into one file.
 
 Running `python Data_Preprocessing.py [INPUT FILE] [OUTPUT DIR]` will create a directory with the files `sample.tsv` and `cleaned.conll` (containing data) and a `sample.info` file with information about the data.
 
