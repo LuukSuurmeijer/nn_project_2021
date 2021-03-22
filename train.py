@@ -58,7 +58,7 @@ EPOCHS = args.epochs
 
 
 #create model, define loss function and optimizer
-model = RNNTagger(embedding_dim=EMBEDDING_DIM, hidden_dim=HIDDEN_DIM, tagset_size=TAGSET_SIZE, n_layers=args.num_layers, type=args.type)
+model = RNNTagger(embedding_dim=EMBEDDING_DIM, hidden_dim=HIDDEN_DIM, tagset_size=TAGSET_SIZE, n_layers=args.num_layers, type=args.type).to(device)
 
 summarize(model)
 print(f"Using {args.type} on {device}")
@@ -72,7 +72,7 @@ d = datasets.load_dataset('TagDataset.py', data_dir='train_test_split/')
 #load the tokenizer and embeddings
 print("...Generating embeddings...")
 tokenizer = AutoTokenizer.from_pretrained('bert-base-uncased', use_fast=True, is_split_into_words=True)
-embedding_model = BertModel.from_pretrained('bert-base-uncased', output_hidden_states = True)
+embedding_model = BertModel.from_pretrained('bert-base-uncased', output_hidden_states = True).to(device)
 label_to_id = get_label2id_list(d, 'tags')
 
 #preparing the datasets
