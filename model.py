@@ -23,8 +23,8 @@ class RNNTagger(nn.Module):
         #sentence is a torch tensor of (1, seq_len, training_size)
         hidden, _ = self.input2hidden(sentence)
         output = self.hidden2tag(hidden)
-        predictions = F.log_softmax(output, dim=1)
-        return predictions
+        #predictions = F.log_softmax(output, dim=1)
+        return output
 
     def initHidden(self):
         return torch.zeros(1, self.hidden_dim)
