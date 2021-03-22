@@ -71,7 +71,7 @@ summarize(model)
 print(f"Using {args.type} on {device}")
 
 optimizer = optim.Adam(model.parameters(), lr=args.lr)
-criterion = nn.CrossEntropyLoss(ignore_index=-100) #ignore padding ?
+criterion = nn.CrossEntropyLoss(ignore_index=-100).to(device) #ignore padding ?
 
 #load the data
 d = datasets.load_dataset('TagDataset.py', data_dir='train_test_split/')
