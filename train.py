@@ -35,12 +35,21 @@ def summarize(model):
 
 #adapted from https://github.com/bentrevett/pytorch-pos-tagging/blob/master/1%20-%20BiLSTM%20for%20PoS%20Tagging.ipynb
 def accuracy(preds, targets):
-    preds = preds * -1
+    # preds = preds * -1 (don't need this)
     max_preds = preds.argmax(dim = 1, keepdim = True).squeeze() # get the index of the max probability
     targets = targets
     correct = [i for i in range(len(targets)) if max_preds[i] == targets[i] and targets[i] != -100] #correct labels except the pads
+    # non_pad_elements = (targets != -100).nonzero() (this was from the tutorial linked above, might need it again, because it does it with tensors?)
+
+    # get the number of non-pad tokens in the target
+    to_be_ignored = [i for i, label_id in enumerate(targets) if label_id == -100]
+    target_cleaned = [label_id for i, label_id in enumerate(targets) if i not in to_be_ignored]
+    num_target_non_pad_tokens = len(target_cleaned)
+
+    # correct = max_preds[non_pad_elements].squeeze(1).eq(targets[non_pad_elements])
     num_correct = len(correct)
-    return np.round(num_correct / len(targets), 6)
+    return np.round(num_correct / num_target_non_pad_tokens, 6)
+    # return correct.sum() / torch.FloatTensor([targets[non_pad_elements].shape[0]]).to(device)
 
 
 parser = argparse.ArgumentParser(description='Train the neural network.')
@@ -151,8 +160,15 @@ def train():
 
             wandb.log({"loss" : loss, "accuracy" : acc})
 
-            if id % 30 == 0 or id == len(train_dataloader):
-                print("Epoch: {:<12} | acc: {:<12} | loss: {:<12}".format(f"{epoch+1} ({id}/{len(train_dataloader)})", acc ,loss.item()))
+            print_acc = running_acc / len(train_dataloader)
+            print_loss = running_loss / len(train_dataloader)
+
+            if args.batchsize == 1 and id % 30 == 0:
+                print("Epoch: {:<12} | acc: {:<12} | loss: {:<12}".format(f"{epoch+1} ({id}/{len(train_dataloader)})",
+                                                                          acc, loss.item()))
+            elif args.batchsize > 1 and id == len(train_dataloader):
+                print("Epoch: {:<12} | acc: {:<12} | loss: {:<12}".format(f"{epoch + 1} ({id}/{len(train_dataloader)})",
+                                                                          print_acc, print_loss))
 
         print(f"Loss after epoch {epoch+1}: {running_loss}")
         print(f"Avg acc after epoch {epoch+1}: {running_acc/len(train_dataloader)}")
