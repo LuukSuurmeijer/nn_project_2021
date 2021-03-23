@@ -55,8 +55,8 @@ def accuracy(preds, targets):
 
 parser = argparse.ArgumentParser(description='Train the neural network.')
 parser.add_argument('--num_layers', type=int, default=1, help='number of recurrent layers')
-parser.add_argument('--epochs', type=int, default=15, help='number of epochs')
-parser.add_argument('--hiddens', type=int, default=200, help='number of hidden units per layer')
+parser.add_argument('--epochs', type=int, default=3, help='number of epochs')
+parser.add_argument('--hiddens', type=int, default=100, help='number of hidden units per layer')
 parser.add_argument('--type', help="LSTM/RNN", required=True)
 parser.add_argument('--batchsize', type=int, default=1, help="Batch size, must be 1 for CPU (i think)")
 parser.add_argument('--lr', type=float, default=0.001, help="learning rate")
@@ -248,7 +248,7 @@ def look_at_test_example(sentence_id):
     :param sentence_id: id of the testing example that should be looked at
     """
 
-    model.load_state_dict(torch.load('model/rnn.model'))
+    model.load_state_dict(torch.load(f'{args.output}.model'))
     model.eval()
 
     input = create_embeddings(embedding_model, test_dataset['input_ids'][sentence_id])  # shape: (1, 86, 768)
