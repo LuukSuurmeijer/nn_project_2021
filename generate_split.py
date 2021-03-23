@@ -16,7 +16,6 @@ def randomsplit(corpus, split, outdir=""):
     train = corpus[0:trainsplit+1]
     test = corpus[trainsplit+1:]
 
-    print(len(train), len(test))
 
     path = "train_test_split"
 
