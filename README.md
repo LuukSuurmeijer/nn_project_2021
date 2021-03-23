@@ -20,7 +20,7 @@ $ conda activate lara_luuk_annalena
 ## Data Preprocessing
 The data for training our model is the data from the [Ontonotes 4.0](https://catalog.ldc.upenn.edu/LDC2011T03) dataset. Running `cat *.gold_conll >> [OUTPUT FILE]` or `type *.gold_conll > [OUTPUT FILE]` (on Windows) concatenates the files into one file which can subsequently be fed to the data preprocessing script.
 
-Running `python Data_Preprocessing.py [INPUT FILE] [OUTPUT DIR]` will create a directory with the files `cleaned.tsv` and `cleaned.conll` (containing data) and a `data.info` file with information about the data.
+Running `python Data_Preprocessing.py [INPUT FILE] [OUTPUT DIR]` will create a directory with the files `data.tsv` (containing data) and a `data.info` file with information about the data.
 
 Run `python generate_split.py [CLEANED DATA FILE] --outdir train_test_split --split 0.9` to create a new directory with the train and test splits.
 
