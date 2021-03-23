@@ -8,7 +8,7 @@
 * [Data Loading](#data-loading)
 * [Tokenizing](#tokenizing)
 * [Embeddings](#embeddings)
-* [Running the model](#running_the_model)
+* [Running the model](#running-the-model)
 
 ## General info
 
