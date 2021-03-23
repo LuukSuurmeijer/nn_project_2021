@@ -84,9 +84,9 @@ To train and test the model call `train.py`. The following arguments can be spec
 
 - `--num_layers`   number of recurrent layers, default: `1`
 
-- `--epochs`       number of epochs, default: `15`
+- `--epochs`       number of epochs, default: `3`
 
-- `--hiddens`      number of hidden units per layer, default: `200`
+- `--hiddens`      number of hidden units per layer, default: `100`
 
 - `--type`         model type (LSTM or RNN), no default, this must be specified
 
