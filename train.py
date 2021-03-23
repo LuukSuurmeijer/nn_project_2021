@@ -65,16 +65,18 @@ parser.add_argument('--output', default=None, help="save model")
 args = parser.parse_args()
 
 
-HIDDEN_DIM = args.hiddens
-EMBEDDING_DIM = 768
-TAGSET_SIZE = 40
-EPOCHS = args.epochs
-
 wandb.init(project='nn_project_2021')
 wandb.config.update(args)
-
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+#load the data
+d = datasets.load_dataset('TagDataset.py', data_dir='train_test_split/')
+label_to_id = get_label2id_list(d, 'tags')
+
+HIDDEN_DIM = args.hiddens
+EMBEDDING_DIM = 768
+TAGSET_SIZE = len(label_to_id)
+EPOCHS = args.epochs
 
 #create model, define loss function and optimizer
 model = RNNTagger(embedding_dim=EMBEDDING_DIM, hidden_dim=HIDDEN_DIM, tagset_size=TAGSET_SIZE, n_layers=args.num_layers, type=args.type).to(device)
@@ -85,14 +87,14 @@ print(f"Using {args.type} on {device}")
 optimizer = optim.Adam(model.parameters(), lr=args.lr)
 criterion = nn.CrossEntropyLoss(ignore_index=-100).to(device) #ignore padding ?
 
-#load the data
-d = datasets.load_dataset('TagDataset.py', data_dir='train_test_split/')
+
 
 #load the tokenizer and embeddings
 print("...Generating embeddings...")
 tokenizer = AutoTokenizer.from_pretrained('bert-base-uncased', use_fast=True, is_split_into_words=True)
 embedding_model = BertModel.from_pretrained('bert-base-uncased', output_hidden_states = True).to(device)
 label_to_id = get_label2id_list(d, 'tags')
+
 
 #preparing the datasets
 print("...Tokenizing data...")
