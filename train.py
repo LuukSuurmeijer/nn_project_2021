@@ -158,7 +158,7 @@ def train():
             train_acc.append(acc)
             train_counter.append(((epoch*len(train_dataloader)) + id)*args.batchsize)
 
-            wandb.log({"loss" : loss, "accuracy" : acc})
+            wandb.log({"train_loss" : loss, "train_accuracy" : acc})
 
             print_acc = running_acc / len(train_dataloader)
             print_loss = running_loss / len(train_dataloader)
@@ -224,6 +224,7 @@ def test():
             loss = criterion(pred, target)  # calculate loss
             acc = accuracy(pred, target)
 
+            wandb.log({"test_loss" : loss, "test_accuracy" : acc})
             running_loss += loss.item()
             running_acc += acc
 
