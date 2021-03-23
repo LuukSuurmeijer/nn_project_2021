@@ -3,7 +3,7 @@ import os
 from collections import Counter
 
 def get_sentences(infile, outfile):
-    with open(infile) as fin, open(outfile, "w+") as fout:
+    with open(infile, encoding='UTF-8') as fin, open(outfile, "w+", encoding='UTF-8') as fout:
         tags = Counter()
         sentences = []
         sentence = []
@@ -12,11 +12,13 @@ def get_sentences(infile, outfile):
                 index = line.split()[2]
                 word = line.split()[3]
                 POS = line.split()[4]
+                if word in ['"', "'"]:
+                    word = '\\'+word
                 fout.write(index + '\t' + word + '\t' + POS + '\n')
                 tags[POS] += 1
                 sentence.append(word)
             if line == '\n':
-                fout.write('\n')
+                fout.write('*\n')
                 sentences.append(sentence)
                 sentence = []
     return tags, sentences

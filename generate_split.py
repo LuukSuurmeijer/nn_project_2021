@@ -8,17 +8,16 @@ def find_nearest_delimiter(index, array):
         if array[i][0] == '*':
             return i
 
-    for i in range(index, 0, -1):
-        if array[i][0] == '*':
-            return i
 
 def randomsplit(corpus, split, outdir=""):
     # example: split = 0.8
     # train = 80% of the data, test = 10%, valid = 10%
     trainsplit = find_nearest_delimiter(int(len(corpus) * split), corpus)
-
+    print(len(corpus))
     train = corpus[0:trainsplit+1]
     test = corpus[trainsplit+1:]
+
+    print(len(train), len(test))
 
     path = "train_test_split"
 
