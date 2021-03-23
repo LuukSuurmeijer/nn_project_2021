@@ -14,13 +14,14 @@ from model import RNNTagger
 #plotting outputs/argparse
 import matplotlib.pyplot as plt
 import wandb
+import pickle
 import argparse
 from functools import partial
 
 import sys
 
 
-def summarize(model):
+def summarize(model, hyperparameters):
     data = {name: [name, [*param.data.shape], param.numel()] for name, param in model.named_parameters() if param.requires_grad}
     print("{:<25} {:<25} {:<25}".format("Layer", "Dim", "Number of parameters"))
     print(("="*25)*3)
@@ -31,7 +32,8 @@ def summarize(model):
     total = sum([param[2] for param in data.values()])
     print(f"Total trainable parameters: {total}" )
     print(f"Estimated memory required: {(total * 4) * (10**-6)} MB")
-    print("\n")
+    for key, value in hyperparameters.items():
+        print("{:<15}: {:<15}".format(key, str(value)))
 
 #adapted from https://github.com/bentrevett/pytorch-pos-tagging/blob/master/1%20-%20BiLSTM%20for%20PoS%20Tagging.ipynb
 def accuracy(preds, targets):
@@ -56,9 +58,11 @@ parser = argparse.ArgumentParser(description='Train the neural network.')
 parser.add_argument('--num_layers', type=int, default=1, help='number of recurrent layers')
 parser.add_argument('--epochs', type=int, default=15, help='number of epochs')
 parser.add_argument('--hiddens', type=int, default=200, help='number of hidden units per layer')
-parser.add_argument('--type', default='RNN', help="LSTM/RNN")
+parser.add_argument('--type', help="LSTM/RNN", required=True)
 parser.add_argument('--batchsize', type=int, default=1, help="Batch size, must be 1 for CPU (i think)")
 parser.add_argument('--lr', type=float, default=0.001, help="learning rate")
+parser.add_argument('--loginterval', type=int, default=5, help="log interval")
+parser.add_argument('--output', default=None, help="save model")
 args = parser.parse_args()
 
 
@@ -76,7 +80,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 #create model, define loss function and optimizer
 model = RNNTagger(embedding_dim=EMBEDDING_DIM, hidden_dim=HIDDEN_DIM, tagset_size=TAGSET_SIZE, n_layers=args.num_layers, type=args.type).to(device)
 
-summarize(model)
+summarize(model, vars(args))
 print(f"Using {args.type} on {device}")
 
 optimizer = optim.Adam(model.parameters(), lr=args.lr)
@@ -115,7 +119,7 @@ train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=args.ba
 #testing dataloader
 test_dataset = test_dataset.map(tokenize_and_align_labels_p, batched=True)
 test_dataset.set_format(type='torch', columns=['input_ids', 'token_type_ids', 'attention_mask', 'labels'])
-test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=args.batchsize)
+test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=args.batchsize) #always batch size 1 for test set so we can plot
 
 
 ### TRAINING ###
@@ -132,6 +136,8 @@ def train():
         running_acc = 0.0
         model.train()
         for id, example in enumerate(train_dataloader):
+            if id == 50:
+                break
             ex = example['input_ids'].to(device)
             input = create_embeddings(embedding_model, ex).to(device) #shape: (1, 86, 768)
             target = example['labels'].to(device)
@@ -163,12 +169,9 @@ def train():
             print_acc = running_acc / len(train_dataloader)
             print_loss = running_loss / len(train_dataloader)
 
-            if args.batchsize == 1 and id % 30 == 0:
+            if args.batchsize == 1 and id % args.loginterval == 0:
                 print("Epoch: {:<12} | acc: {:<12} | loss: {:<12}".format(f"{epoch+1} ({id}/{len(train_dataloader)})",
                                                                           acc, loss.item()))
-            elif args.batchsize > 1 and id == len(train_dataloader)-1:
-                print("Epoch: {:<12} | acc: {:<12} | loss: {:<12}".format(f"{epoch + 1} ({id}/{len(train_dataloader)})",
-                                                                          print_acc, print_loss))
 
         print(f"Loss after epoch {epoch+1}: {running_loss}")
         print(f"Avg acc after epoch {epoch+1}: {running_acc/len(train_dataloader)}")
@@ -176,7 +179,10 @@ def train():
         avg_epoch_acc.append(running_acc/len(train_dataloader))
 
     # Save model for inference
-    torch.save(model.state_dict(), 'model/rnn.model')
+    if args.output:
+        torch.save(model.state_dict(), f'{args.output}.model') #save model
+        with open(f'{args.output}_dict.pickle', 'wb') as handle: #save mapping from ids to labels
+            pickle.dump(label_to_id, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     # plot error
     plt.plot(train_counter, train_losses, color='blue', zorder=1)
@@ -196,11 +202,16 @@ def train():
 
 
 ### EVALUATING ###
-def test():
+def test(testmodel=None, load=None):
     print("EVALUATING THE MODEL")
     # TODO: We need to make the file path for loading the state dict an argument depending on which model we train?
-    model.load_state_dict(torch.load('model/rnn.model'))
+    if load:
+        model.load_state_dict(torch.load(f'{load}'))
+    elif testmodel:
+        model = testmodel
+
     model.eval()
+
 
     running_loss = 0.0
     running_acc = 0.0
@@ -232,11 +243,6 @@ def test():
     print(f'Average accuracy per example: {running_acc / len(test_dataloader)}')
 
 
-train()
-
-test()
-
-
 def look_at_test_example(sentence_id):
     """
     print a testing example to the console
@@ -266,3 +272,8 @@ def look_at_test_example(sentence_id):
     print(f"Words: {sentence}")
     print(f"Predicted tags: {labels_cleaned}")
     print(f"Correct tags: {d['test']['tags'][sentence_id]}")
+
+
+train()
+
+test(testmodel=model)
