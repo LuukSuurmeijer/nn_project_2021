@@ -137,8 +137,6 @@ def train():
         running_acc = 0.0
         model.train()
         for id, example in enumerate(train_dataloader):
-            if id == 50:
-                break
             ex = example['input_ids'].to(device)
             input = create_embeddings(embedding_model, ex).to(device) #shape: (1, 86, 768)
             target = example['labels'].to(device)
