@@ -20,7 +20,7 @@ from functools import partial
 import sys
 
 
-def summarize(model, hyperparameters):
+def summarize(model, hyperparameters, bs):
     data = {name: [name, [*param.data.shape], param.numel()] for name, param in model.named_parameters() if param.requires_grad}
     print("{:<25} {:<25} {:<25}".format("Layer", "Dim", "Number of parameters"))
     print(("="*25)*3)
@@ -30,7 +30,7 @@ def summarize(model, hyperparameters):
     print(("="*25)*3)
     total = sum([param[2] for param in data.values()])
     print(f"Total trainable parameters: {total}" )
-    print(f"Estimated memory required: {(total * 4) * (10**-6)} MB")
+    print(f"Estimated memory required: {((total * 4) * (10**-6)) * bs} MB")
     for key, value in hyperparameters.items():
         print("{:<15}: {:<15}".format(key, str(value)))
 
@@ -81,7 +81,7 @@ EPOCHS = args.epochs
 #create model, define loss function and optimizer
 model = RNNTagger(embedding_dim=EMBEDDING_DIM, hidden_dim=HIDDEN_DIM, tagset_size=TAGSET_SIZE, n_layers=args.num_layers, type=args.type).to(device)
 
-summarize(model, vars(args))
+summarize(model, vars(args), args.batchsize)
 print(f"Using {args.type} on {device}")
 
 optimizer = optim.Adam(model.parameters(), lr=args.lr)
