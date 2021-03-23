@@ -168,7 +168,7 @@ def train():
             print_acc = running_acc / len(train_dataloader)
             print_loss = running_loss / len(train_dataloader)
 
-            if args.batchsize == 1 and id % args.loginterval == 0:
+            if id % args.loginterval == 0:
                 print("Epoch: {:<12} | acc: {:<12} | loss: {:<12}".format(f"{epoch+1} ({id}/{len(train_dataloader)})",
                                                                           acc, loss.item()))
 
