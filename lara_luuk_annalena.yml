@@ -9,4 +9,5 @@ dependencies:
     - datasets
     - torch
     - transformers
-    - pickle
+    - pickle5
+    - wandb
