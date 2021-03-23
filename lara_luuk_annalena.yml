@@ -9,3 +9,4 @@ dependencies:
     - datasets
     - torch
     - transformers
+    - pickle
