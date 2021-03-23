@@ -13,11 +13,9 @@ def randomsplit(corpus, split, outdir=""):
     # example: split = 0.8
     # train = 80% of the data, test = 10%, valid = 10%
     trainsplit = find_nearest_delimiter(int(len(corpus) * split), corpus)
-    print(len(corpus))
     train = corpus[0:trainsplit+1]
     test = corpus[trainsplit+1:]
 
-    print(len(train), len(test))
 
     path = "train_test_split"
 
