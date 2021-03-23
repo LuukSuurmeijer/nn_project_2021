@@ -32,11 +32,10 @@ Run `python generate_split.py [CLEANED DATA FILE] --outdir train_test_split --sp
 
 Example of use:
 
-`d = datasets.load_dataset('TagDataset.py', data_dir='train_test_split/')`
-
-`d`
-
-`>DatasetDict({
+```
+>>> d = datasets.load_dataset('TagDataset.py', data_dir='train_test_split/')
+>>> d
+> DatasetDict({
     train: Dataset({
         features: ['index', 'word', 'tag'],
         num_rows: 5217
@@ -45,52 +44,53 @@ Example of use:
         features: ['index', 'word', 'tag'],
         num_rows: 569
     })
-})`
+})
 
-`d['train']`
-
-`>Dataset({
+>>> d['train']
+> Dataset({
     features: ['index', 'word', 'tag'],
     num_rows: 5217
-})`
+})
 
-`d['train'][0]`
+>>> d['train'][0]
+> {'index': 0, 'tag': 'NNP', 'word': 'xinhua'}
 
-`>{'index': 0, 'tag': 'NNP', 'word': 'xinhua'}`
+```
+
 
 ### Tokenizing
 
 Words are lowercased and punctuation from dates and numbers etc. is removed in lines 60-80 in `TagDataset.py`
 
-The method `tokenize_and_align_labels` in `embeddings.py` is adapted from [huggingface](https://github.com/huggingface/transformers/blob/master/examples/token-classification/run_ner.py). Tokens are mapped to der Word IDs and sentences are padded to the longest sentence. Labels are aligned with the padded sentences taking care of the padding, the splitting of words in several parts with the same ID (e.g. #embedding #s) and special tokens ([SEP] and [CLS]) by assigning those the lable `-100`. 
+The method `tokenize_and_align_labels` in `embeddings.py` is adapted from [huggingface](https://github.com/huggingface/transformers/blob/master/examples/token-classification/run_ner.py). Tokens are mapped to their Word IDs and sentences are padded to the longest sentence. Labels are aligned with the padded sentences, while taking care of the splitting of words in several parts with the same ID (e.g. #embedding #s) and special tokens ([SEP] and [CLS]) by assigning those the label `-100`. 
 
 ### Embeddings
 
-The method `create_embeddings` is given a tokenized sentences and an embedding model and returns the embedded sentence (dimensions 1 x max sentence length x 768). The method is called during training and creates embeddings one by one. 
+The method `create_embeddings` is given a tokenized sentences and an embedding model and returns the embedded sentence (dimensions: 1 x max sentence length x 768). The method is called during training and creates embeddings one by one. 
 
 ## Model
 
-`Model.py` contains the method to initialize the model used for training. There are either a simple RNN model or a LSTM model available.
+`model.py` contains the method to initialize the model used for training. There are either a simple RNN model or a LSTM model available.
 
 ### Training
 
 To train the model call `train.py`. The following arguments can be specified:
 
-`--num_layers`   number of recurrent layers, default: `1`
+- `--num_layers`   number of recurrent layers, default: `1`
 
-`--epochs`       number of epochs, default: `15`
+- `--epochs`       number of epochs, default: `15`
 
-`--hiddens`      number of hidden units per layer, default: `200`
+- `--hiddens`      number of hidden units per layer, default: `200`
 
-`--type`         model type (LSTM or RNN), no default, this must be specified
+- `--type`         model type (LSTM or RNN), no default, this must be specified
 
-`--batchsize`   batch size, default: `1`
+- `--batchsize`   batch size, default: `1`
 
-`--lr`          learning rate, default: `0.001`
+- `--lr`          learning rate, default: `0.001`
 
-`--loginterval` interval at which logs should be printed to the console, default: `5`
+- `--loginterval` interval at which logs should be printed to the console, default: `5`
 
-`--output`      name under which the model should be saved, default: `None`, if nothing is specified, the model will not be saved for inference
+-  `--output`      name under which the model should be saved, default: `None`, if nothing is specified, the model will not be saved for inference
 
 To see a list of all arguments do `python train.py -h`. 
 
