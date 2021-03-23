@@ -9,8 +9,9 @@ import torch
 def tokenize_and_align_labels(d, label_to_id, tokenizer, text_column_name, label_column_name):
     tokenized_inputs = tokenizer(
         d[text_column_name],
-        padding="longest",
+        padding='max_length',
         truncation=True,
+        max_length=86,
         # We use this argument because the texts in our dataset are lists of words (with a label for each word).
         is_split_into_words=True,
     )
