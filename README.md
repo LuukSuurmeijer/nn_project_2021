@@ -6,9 +6,16 @@
 * [Installing](#installing)
 * [Data Preprocessing](#data-Preprocessing)
 * [Data Loading](#data-loading)
+* [Tokenizing](#tokenizing)
+* [Embeddings](#embeddings)
+* [Model](#model)
 
 ## General info
-Short description of the project.
+
+Language is often represented as sequential data - e.g., each word in a sentence is one data point in a series of data points. Therefore, sequence modelling for neural networks in NLP is common. For Part-of-Speech tagging, the context of a tag (i.e. words and tags to the left and right of the word we are looking to tag) is critical, which makes sequence modelling particularly applicable for this task. 
+There are different neural network types for sequential modelling, e.g. vanilla recurrent neural networks (RNNs)  or long-short-term-memory (LSTM) models, which are a special kind of RNNs. RNNs suffer from vanishing gradient problems as they backpropagte error through time. LSTMs were created to especially avoid the vanishing gradient problem that comes with regular RNNs and can better capture long-term dependencies.
+
+We implemented two two different model architectures (RNN and LSTM) for POS tagging and measure our results in accuracy to be able to directly compare their differences in performance.
 
 ## Installing
 Use Conda to create/activate the environment:
