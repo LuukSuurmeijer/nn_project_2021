@@ -84,7 +84,7 @@ To train and test the model call `train.py`. The following arguments can be spec
 
 - `--num_layers`   number of recurrent layers, default: `1`
 
-- `--epochs`       number of epochs, default: `3`
+- `--epochs`       number of epochs, default: `15`
 
 - `--hiddens`      number of hidden units per layer, default: `200`
 
@@ -100,7 +100,7 @@ To train and test the model call `train.py`. The following arguments can be spec
 
 To see a list of all arguments do `python train.py -h`. 
 
-Running `python train.py --type [MODEL TYPE]` will initialize the default model. Data will be loaded and tokenized and the model will be trained for 3 epochs (mini-batchsize of 1 sentence) using Cross Entropy Loss. If CUDA is available, the model will be trained on CUDA, else on GPU. After training, the model will be saved to `model/[NAME OF MODEL].model` and loss and accuracy will be plotted. 
+Running `python train.py --type [MODEL TYPE]` will initialize the default model. Data will be loaded and tokenized and the model will be trained for 15 epochs (mini-batchsize of 1 sentence) using Cross Entropy Loss. If CUDA is available, the model will be trained on CUDA, else on GPU. After training, the model will be saved to `model/[NAME OF MODEL].model` and loss and accuracy will be plotted. 
 
 After training, the model will immediately be evaluated on the test data, and average test loss and accuracy will be shown.
 
