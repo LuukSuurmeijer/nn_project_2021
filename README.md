@@ -74,7 +74,7 @@ The method `tokenize_and_align_labels` in `embeddings.py` is adapted from [huggi
 
 ## Embeddings
 
-The method `create_embeddings` is given a tokenized sentences and an embedding model and returns the embedded sentence (dimensions: 1 x max sentence length x 768). The method is called during training and creates embeddings one by one. 
+The method `create_embeddings` is given a tokenized sentences and an embedding model and returns the embedded sentence (dimensions: 1 x max sentence length x 768). The method is called during training and creates embeddings one by one/batch by batch. 
 
 ## Running the model
 
@@ -104,4 +104,4 @@ Running `python train.py --type [MODEL TYPE]` will initialize the default model.
 
 After training, the model will immediately be evaluated on the test data, and average test loss and accuracy will be shown.
 
-
+We implemented a method `look_at_test_example()` in `train.py` which takes an id of a testing example, loads the model from the `*.model` file and prints the sentence, the predicted tags as well as the correct tags to the console. However, due to reasons of time we were not able to use the method and find interesting examples.
